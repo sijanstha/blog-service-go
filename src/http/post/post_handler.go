@@ -5,6 +5,7 @@ import (
 
 	pdomain "github.com/blog-service/src/domain/post"
 	"github.com/blog-service/src/service/post"
+	dateutils "github.com/blog-service/src/utils/date"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,6 +16,7 @@ type PostHandler interface {
 	Get(c *gin.Context)
 	GetAll(c *gin.Context)
 	GetAllWithPagination(c *gin.Context)
+	Delete(c *gin.Context)
 }
 
 type postHandler struct {
@@ -99,4 +101,18 @@ func (handler *postHandler) GetAllWithPagination(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+func (handler *postHandler) Delete(c *gin.Context) {
+	err := handler.postService.Delete(c.Param("post_id"))
+	if err != nil {
+		c.JSON(err.Code, err)
+		return
+	}
+
+	response := map[string]interface{}{
+		"message":   "Deleted Successfully",
+		"timestamp": dateutils.GetNow().Unix(),
+	}
+	c.JSON(http.StatusOK, response)
 }

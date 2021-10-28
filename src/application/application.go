@@ -29,6 +29,7 @@ func registerRoutesForPost() {
 		postRoutes.POST("/search", pHandler.Get)
 		postRoutes.GET("/search/all", pHandler.GetAll)
 		postRoutes.POST("/search/all", pHandler.GetAllWithPagination)
+		postRoutes.DELETE("/:post_id", pHandler.Delete)
 	}
 
 }

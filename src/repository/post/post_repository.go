@@ -6,6 +6,7 @@ import (
 
 	"github.com/blog-service/src/datasources/mysql"
 	"github.com/blog-service/src/domain/post"
+	dateutils "github.com/blog-service/src/utils/date"
 	fileutils "github.com/blog-service/src/utils/file"
 	"github.com/blog-service/src/utils/logger"
 )
@@ -34,7 +35,7 @@ type IPostRepository interface {
 	Find(post.PostFilter) (*post.Post, error)
 	FindAll() []post.Post
 	FindAllWithPagination(post.PostListFilter) *post.PostPaginationDetails
-	Delete(string) error
+	Delete(*post.Post) error
 }
 
 type postRepository struct{}
@@ -99,6 +100,11 @@ func (p *postRepository) Update(post *post.Post) (*post.Post, error) {
 	if post.UpdatedAt != "" && len(post.UpdatedAt) > 0 {
 		values += "updated_at=?,"
 		args = append(args, post.UpdatedAt)
+	}
+
+	if post.DeletedAt != "" && len(post.DeletedAt) > 0 {
+		values += "deleted_at=?,"
+		args = append(args, post.DeletedAt)
 	}
 
 	values += "active=?, deleted=?"
@@ -224,7 +230,9 @@ func (p *postRepository) FindAll() []post.Post {
 }
 
 func (p *postRepository) FindAllWithPagination(filter post.PostListFilter) *post.PostPaginationDetails {
-	result := &post.PostPaginationDetails{}
+	result := &post.PostPaginationDetails{
+		Data: []post.Post{},
+	}
 	selectAllQueryStr, err := fileutils.LoadResourceAsString(SELECT_POST_WITH_LIMIT_LOC)
 	if err != nil {
 		logger.Error(fmt.Sprintf("cannot open file to this path: %s", INSERT_POST_LOC), err)
@@ -297,6 +305,15 @@ func (p *postRepository) FindAllWithPagination(filter post.PostListFilter) *post
 	return result
 }
 
-func (p *postRepository) Delete(id string) error {
+func (p *postRepository) Delete(request *post.Post) error {
+	request.IsActive = false
+	request.IsDeleted = true
+	request.DeletedAt = dateutils.GetNow().String()
+	request.UpdatedAt = request.DeletedAt
+
+	_, err := p.Update(request)
+	if err != nil {
+		return err
+	}
 	return nil
 }

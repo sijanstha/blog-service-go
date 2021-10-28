@@ -15,6 +15,7 @@ type PostService interface {
 	Find(post.PostFilter) (*post.Post, *errors.RestErr)
 	FindAll() []post.Post
 	FindAllWithPagination(post.PostListFilter) (*post.PostPaginationDetails, *errors.RestErr)
+	Delete(string) *errors.RestErr
 }
 
 type postService struct {
@@ -109,4 +110,18 @@ func (s *postService) FindAllWithPagination(filter post.PostListFilter) (*post.P
 		return nil, errors.NewBadRequestError(err.Error())
 	}
 	return s.postRepo.FindAllWithPagination(filter), nil
+}
+
+func (s *postService) Delete(id string) *errors.RestErr {
+
+	req, restErr := s.FindById(id)
+	if restErr != nil {
+		return restErr
+	}
+
+	err := s.postRepo.Delete(req)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	return nil
 }
