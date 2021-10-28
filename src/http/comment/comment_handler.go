@@ -1,15 +1,15 @@
-package posthandler
+package commenthandler
 
 import (
 	"net/http"
 
-	pdomain "github.com/blog-service/src/domain/post"
-	"github.com/blog-service/src/service/post"
+	cdomain "github.com/blog-service/src/domain/comment"
+	"github.com/blog-service/src/service/comment"
 	dateutils "github.com/blog-service/src/utils/date"
 	"github.com/gin-gonic/gin"
 )
 
-type IPostHandler interface {
+type ICommentHandler interface {
 	Create(c *gin.Context)
 	Update(c *gin.Context)
 	GetById(c *gin.Context)
@@ -19,22 +19,22 @@ type IPostHandler interface {
 	Delete(c *gin.Context)
 }
 
-type postHandler struct {
-	postService post.IPostService
+type commentHandler struct {
+	commentService comment.ICommentService
 }
 
-func NewPostHandler(postService post.IPostService) IPostHandler {
-	return &postHandler{postService}
+func NewCommentHandler(commentService comment.ICommentService) ICommentHandler {
+	return &commentHandler{commentService}
 }
 
-func (handler *postHandler) Create(c *gin.Context) {
-	var request pdomain.Post
+func (handler *commentHandler) Create(c *gin.Context) {
+	var request cdomain.Comment
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, "Invalid JSON body")
 		return
 	}
 
-	result, err := handler.postService.Save(&request)
+	result, err := handler.commentService.Save(&request)
 	if err != nil {
 		c.JSON(err.Code, err)
 		return
@@ -43,14 +43,14 @@ func (handler *postHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, result)
 }
 
-func (handler *postHandler) Update(c *gin.Context) {
-	var request pdomain.Post
+func (handler *commentHandler) Update(c *gin.Context) {
+	var request cdomain.Comment
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, "Invalid JSON body")
 		return
 	}
 
-	result, err := handler.postService.Update(&request)
+	result, err := handler.commentService.Update(&request)
 	if err != nil {
 		c.JSON(err.Code, err)
 		return
@@ -59,8 +59,8 @@ func (handler *postHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusAccepted, result)
 }
 
-func (handler *postHandler) GetById(c *gin.Context) {
-	post, err := handler.postService.FindById(c.Param("post_id"))
+func (handler *commentHandler) GetById(c *gin.Context) {
+	post, err := handler.commentService.FindById(c.Param("comment_id"))
 	if err != nil {
 		c.JSON(err.Code, err)
 		return
@@ -69,13 +69,13 @@ func (handler *postHandler) GetById(c *gin.Context) {
 	c.JSON(http.StatusOK, post)
 }
 
-func (handler *postHandler) Get(c *gin.Context) {
-	var request pdomain.PostFilter
+func (handler *commentHandler) Get(c *gin.Context) {
+	var request cdomain.CommentFilter
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, "Invalid JSON body")
 		return
 	}
-	result, err := handler.postService.Find(request)
+	result, err := handler.commentService.Find(request)
 	if err != nil {
 		c.JSON(err.Code, err)
 		return
@@ -84,17 +84,17 @@ func (handler *postHandler) Get(c *gin.Context) {
 	c.JSON(http.StatusAccepted, result)
 }
 
-func (handler *postHandler) GetAll(c *gin.Context) {
-	c.JSON(http.StatusOK, handler.postService.FindAll())
+func (handler *commentHandler) GetAll(c *gin.Context) {
+	c.JSON(http.StatusOK, handler.commentService.FindAll(c.Param("post_id")))
 }
 
-func (handler *postHandler) GetAllWithPagination(c *gin.Context) {
-	var request pdomain.PostListFilter
+func (handler *commentHandler) GetAllWithPagination(c *gin.Context) {
+	var request cdomain.CommentListFilter
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, "Invalid JSON body")
 		return
 	}
-	result, err := handler.postService.FindAllWithPagination(request)
+	result, err := handler.commentService.FindAllWithPagination(request)
 	if err != nil {
 		c.JSON(err.Code, err)
 		return
@@ -103,8 +103,8 @@ func (handler *postHandler) GetAllWithPagination(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-func (handler *postHandler) Delete(c *gin.Context) {
-	err := handler.postService.Delete(c.Param("post_id"))
+func (handler *commentHandler) Delete(c *gin.Context) {
+	err := handler.commentService.Delete(c.Param("comment_id"))
 	if err != nil {
 		c.JSON(err.Code, err)
 		return

@@ -1,4 +1,4 @@
-package post
+package comment
 
 import (
 	"reflect"
@@ -7,31 +7,30 @@ import (
 	stringutils "github.com/blog-service/src/utils/string"
 )
 
-type PostFilter struct {
+type CommentFilter struct {
 	Id      string `json:"id"`
-	Title   string `json:"title"`
+	PostId  string `json:"postId"`
 	Active  *bool  `json:"active"`
 	Deleted *bool  `json:"deleted"`
 }
 
-type PostListFilter struct {
-	Filter    PostFilter `json:"filter"`
-	CreatedAt string     `json:"created_at"`
-	Limit     int64      `json:"limit" default:"10"`
-	Page      int64      `json:"page" default:"1"`
-	Sort      string     `json:"sort" default:"asc"`
-	SortBy    string     `json:"sortBy" default:"title"`
+type CommentListFilter struct {
+	Filter CommentFilter `json:"filter"`
+	Limit  int64         `json:"limit" default:"10"`
+	Page   int64         `json:"page" default:"1"`
+	Sort   string        `json:"sort" default:"desc"`
+	SortBy string        `json:"sortBy" default:"updated_at"`
 }
 
-func (filter *PostFilter) Validate() error {
-	if filter.Id == "" && filter.Title == "" {
+func (filter *CommentFilter) Validate() error {
+	if filter.Id == "" && filter.PostId == "" {
 		return errors.ErrFilterConditionMissing
 	}
 
 	return nil
 }
 
-func (filter *PostListFilter) Validate() error {
+func (filter *CommentListFilter) Validate() error {
 	typ := reflect.TypeOf(*filter)
 	if filter.Limit == 0 {
 		field, _ := typ.FieldByName("Limit")
