@@ -7,6 +7,7 @@ import (
 	"github.com/blog-service/src/datasources/mysql"
 	"github.com/blog-service/src/domain/post"
 	dateutils "github.com/blog-service/src/utils/date"
+	errorutils "github.com/blog-service/src/utils/errors"
 	fileutils "github.com/blog-service/src/utils/file"
 	"github.com/blog-service/src/utils/logger"
 )
@@ -23,9 +24,7 @@ const (
 )
 
 var (
-	ErrRowInsertFailed = errors.New("cannot insert post at this moment")
-	ErrInvalidQuery    = errors.New("invalid query")
-	ErrPostNotFound    = errors.New("post not found")
+	ErrPostNotFound = errors.New("post not found")
 )
 
 type IPostRepository interface {
@@ -58,7 +57,7 @@ func (p *postRepository) Save(post *post.Post) (*post.Post, error) {
 	stmt, err := mysql.Client.Prepare(query)
 	if err != nil {
 		logger.Error(fmt.Sprintf("cannot prepare query: %s", query), err)
-		return nil, ErrInvalidQuery
+		return nil, errorutils.ErrInvalidQuery
 	}
 	defer stmt.Close()
 
@@ -72,7 +71,7 @@ func (p *postRepository) Save(post *post.Post) (*post.Post, error) {
 		post.DeletedAt)
 	if err != nil {
 		logger.Error("row insert failed", err)
-		return nil, ErrRowInsertFailed
+		return nil, errorutils.ErrRowInsertFailed
 	}
 
 	return post, nil
@@ -81,7 +80,7 @@ func (p *postRepository) Save(post *post.Post) (*post.Post, error) {
 func (p *postRepository) Update(post *post.Post) (*post.Post, error) {
 	str, err := fileutils.LoadResourceAsString(UPDATE_POST_LOC)
 	if err != nil {
-		logger.Error(fmt.Sprintf("cannot open file to this path: %s", INSERT_POST_LOC), err)
+		logger.Error(fmt.Sprintf("cannot open file to this path: %s", UPDATE_POST_LOC), err)
 		return nil, err
 	}
 
@@ -115,14 +114,14 @@ func (p *postRepository) Update(post *post.Post) (*post.Post, error) {
 
 	stmt, err := mysql.Client.Prepare(query)
 	if err != nil {
-		return nil, ErrInvalidQuery
+		return nil, errorutils.ErrInvalidQuery
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(args...)
 	if err != nil {
 		logger.Error("row insert failed", err)
-		return nil, ErrRowInsertFailed
+		return nil, errorutils.ErrRowInsertFailed
 	}
 
 	return post, nil
@@ -140,7 +139,7 @@ func (p *postRepository) FindById(id string) (*post.Post, error) {
 
 	stmt, err := mysql.Client.Prepare(query)
 	if err != nil {
-		return nil, ErrInvalidQuery
+		return nil, errorutils.ErrInvalidQuery
 	}
 	defer stmt.Close()
 
@@ -157,7 +156,7 @@ func (p *postRepository) FindById(id string) (*post.Post, error) {
 func (p *postRepository) Find(filter post.PostFilter) (*post.Post, error) {
 	str, err := fileutils.LoadResourceAsString(SELECT_ALL_POST_LOC)
 	if err != nil {
-		logger.Error(fmt.Sprintf("cannot open file to this path: %s", INSERT_POST_LOC), err)
+		logger.Error(fmt.Sprintf("cannot open file to this path: %s", SELECT_ALL_POST_LOC), err)
 		return nil, err
 	}
 
@@ -184,7 +183,7 @@ func (p *postRepository) Find(filter post.PostFilter) (*post.Post, error) {
 
 	stmt, err := mysql.Client.Prepare(query)
 	if err != nil {
-		return nil, ErrInvalidQuery
+		return nil, errorutils.ErrInvalidQuery
 	}
 	defer stmt.Close()
 
@@ -202,7 +201,7 @@ func (p *postRepository) FindAll() []post.Post {
 	posts := make([]post.Post, 0)
 	str, err := fileutils.LoadResourceAsString(SELECT_ALL_POST_LOC)
 	if err != nil {
-		logger.Error(fmt.Sprintf("cannot open file to this path: %s", INSERT_POST_LOC), err)
+		logger.Error(fmt.Sprintf("cannot open file to this path: %s", SELECT_ALL_POST_LOC), err)
 		return posts
 	}
 	query := fmt.Sprintf(str, POST_TBL_COLUMNS, POST_TBL_NAME, "1=1")
@@ -235,13 +234,13 @@ func (p *postRepository) FindAllWithPagination(filter post.PostListFilter) *post
 	}
 	selectAllQueryStr, err := fileutils.LoadResourceAsString(SELECT_POST_WITH_LIMIT_LOC)
 	if err != nil {
-		logger.Error(fmt.Sprintf("cannot open file to this path: %s", INSERT_POST_LOC), err)
+		logger.Error(fmt.Sprintf("cannot open file to this path: %s", SELECT_POST_WITH_LIMIT_LOC), err)
 		return result
 	}
 
 	countRowsQueryStr, err := fileutils.LoadResourceAsString(COUNT_POST_ROWS_LOC)
 	if err != nil {
-		logger.Error(fmt.Sprintf("cannot open file to this path: %s", INSERT_POST_LOC), err)
+		logger.Error(fmt.Sprintf("cannot open file to this path: %s", COUNT_POST_ROWS_LOC), err)
 		return result
 	}
 

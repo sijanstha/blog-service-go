@@ -1,1 +1,1 @@
-SELECT %s FROM %s WHERE id = ?
+SELECT %s FROM %s WHERE id = ? AND active = true AND deleted = false;

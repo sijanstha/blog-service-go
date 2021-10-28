@@ -8,7 +8,7 @@ import (
 	stringutils "github.com/blog-service/src/utils/string"
 )
 
-type PostService interface {
+type IPostService interface {
 	Save(*post.Post) (*post.Post, *errors.RestErr)
 	Update(*post.Post) (*post.Post, *errors.RestErr)
 	FindById(string) (*post.Post, *errors.RestErr)
@@ -22,7 +22,7 @@ type postService struct {
 	postRepo postrepo.IPostRepository
 }
 
-func NewPostService(postRepo postrepo.IPostRepository) PostService {
+func NewPostService(postRepo postrepo.IPostRepository) IPostService {
 	return &postService{
 		postRepo,
 	}
