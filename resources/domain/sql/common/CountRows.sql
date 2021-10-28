@@ -1,0 +1,1 @@
+SELECT COUNT(%s) FROM %s WHERE %s;
