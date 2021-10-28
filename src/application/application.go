@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	router = gin.Default()
+	router   = gin.Default()
+	v1Routes = router.Group("/api/v1")
 )
 
 func StartApplication() {
@@ -20,10 +21,14 @@ func StartApplication() {
 func registerRoutesForPost() {
 	pHandler := posthandler.NewPostHandler(post.NewPostService(postrepo.NewPostRepository()))
 
-	router.GET("/posts/:post_id", pHandler.GetById)
-	router.POST("/posts", pHandler.Create)
-	router.PUT("/posts", pHandler.Update)
-	router.POST("/posts/search", pHandler.Get)
-	router.GET("/posts/search/all", pHandler.GetAll)
-	router.POST("/posts/search/all", pHandler.GetAllWithPagination)
+	postRoutes := v1Routes.Group("/posts")
+	{
+		postRoutes.GET("/:post_id", pHandler.GetById)
+		postRoutes.POST("", pHandler.Create)
+		postRoutes.PUT("", pHandler.Update)
+		postRoutes.POST("/search", pHandler.Get)
+		postRoutes.GET("/search/all", pHandler.GetAll)
+		postRoutes.POST("/search/all", pHandler.GetAllWithPagination)
+	}
+
 }
