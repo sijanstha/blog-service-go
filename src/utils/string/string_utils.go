@@ -2,6 +2,7 @@ package stringutils
 
 import (
 	"log"
+	"net/mail"
 	"strconv"
 
 	"github.com/sony/sonyflake"
@@ -32,4 +33,9 @@ func ParseInteger(str string) int64 {
 		return 0
 	}
 	return data
+}
+
+func IsValidEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
 }
