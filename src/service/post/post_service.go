@@ -113,7 +113,6 @@ func (s *postService) FindAllWithPagination(filter post.PostListFilter) (*post.P
 }
 
 func (s *postService) Delete(id string) *errors.RestErr {
-
 	req, restErr := s.FindById(id)
 	if restErr != nil {
 		return restErr

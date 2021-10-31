@@ -3,10 +3,13 @@ package application
 import (
 	commenthandler "github.com/blog-service/src/http/comment"
 	posthandler "github.com/blog-service/src/http/post"
+	rolehandler "github.com/blog-service/src/http/role"
 	commentrepo "github.com/blog-service/src/repository/comment"
 	postrepo "github.com/blog-service/src/repository/post"
+	rolerepo "github.com/blog-service/src/repository/role"
 	"github.com/blog-service/src/service/comment"
 	"github.com/blog-service/src/service/post"
+	"github.com/blog-service/src/service/role"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,6 +20,7 @@ var (
 
 func StartApplication() {
 
+	registerRoutesForRole()
 	registerRoutesForPost()
 	registerRoutesForComment()
 	router.Run(":8080")
@@ -50,5 +54,19 @@ func registerRoutesForComment() {
 		commentRoutes.GET("/search/all", cHandler.GetAll)
 		commentRoutes.POST("/search/all", cHandler.GetAllWithPagination)
 		commentRoutes.DELETE("/:comment_id", cHandler.Delete)
+	}
+}
+
+func registerRoutesForRole() {
+	rHandler := rolehandler.NewRoleHandler(role.NewRoleService(rolerepo.NewRoleRepository()))
+
+	roleRoutes := v1Routes.Group("/roles")
+	{
+		roleRoutes.GET("/:role_id", rHandler.GetById)
+		roleRoutes.POST("", rHandler.Create)
+		roleRoutes.PUT("", rHandler.Update)
+		roleRoutes.POST("/search", rHandler.Get)
+		roleRoutes.GET("/search/all", rHandler.GetAll)
+		roleRoutes.DELETE("/:role_id", rHandler.Delete)
 	}
 }
