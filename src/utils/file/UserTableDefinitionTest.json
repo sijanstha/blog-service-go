@@ -1,0 +1,17 @@
+{
+    "tableName":"tbl_users",
+    "columns":[
+        {
+            "name":"id",
+            "type":"varchar",
+            "size":100,
+            "constraints":["not null", "primary key"]
+        },
+        {
+            "name":"name",
+            "type":"varchar",
+            "size":50,
+            "constraints":["not null"]
+        }
+    ]
+}

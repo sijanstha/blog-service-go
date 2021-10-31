@@ -1,0 +1,84 @@
+{
+    "tableName":"tbl_users",
+    "columns":[
+        {
+            "name":"id",
+            "type":"varchar",
+            "size":100,
+            "constraints":["not null", "primary key"]
+        },
+        {
+            "name":"first_name",
+            "type":"varchar",
+            "size":50,
+            "constraints":["not null"]
+        },
+        {
+            "name":"last_name",
+            "type":"varchar",
+            "size":50,
+            "constraints":["not null"]
+        },
+        {
+            "name":"email",
+            "type":"varchar",
+            "size":100,
+            "constraints":["not null", "unique"]
+        },
+        {
+            "name":"password_hash",
+            "type":"varchar",
+            "size":255,
+            "constraints":["not null"]
+        },
+        {
+            "name":"profile_picture_url",
+            "type":"varchar",
+            "size":255,
+            "constraints":[]
+        },
+        {
+            "name":"fk_role_id",
+            "type":"varchar",
+            "size":100,
+            "constraints":["not null"],
+            "isForeignKey":true,
+            "foreignKeyReference":{
+                "tableName":"tbl_role",
+                "columnName":"id"
+            }
+        },
+        {
+            "name":"active",
+            "type":"boolean",
+            "size":1,
+            "constraints":[],
+            "defaultValue":"true"
+        },
+        {
+            "name":"deleted",
+            "type":"boolean",
+            "size":1,
+            "constraints":[],
+            "defaultValue":"false"
+        },
+        {
+            "name":"created_at",
+            "type":"varchar",
+            "size":100,
+            "constraints":["not null"]
+        },
+        {
+            "name":"updated_at",
+            "type":"varchar",
+            "size":100,
+            "constraints":["not null"]
+        },
+        {
+            "name":"deleted_at",
+            "type":"varchar",
+            "size":100,
+            "constraints":[]
+        }
+    ]
+}
