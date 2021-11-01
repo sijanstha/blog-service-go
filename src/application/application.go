@@ -23,6 +23,7 @@ var (
 
 func StartApplication() {
 
+	registerRoutesForUserAuth()
 	registerRoutesForRole()
 	registerRoutesForPost()
 	registerRoutesForComment()
@@ -80,11 +81,21 @@ func registerRoutesForUser() {
 	postRoutes := v1Routes.Group("/users")
 	{
 		postRoutes.GET("/:user_id", uHandler.GetById)
-		postRoutes.POST("", uHandler.Create)
-		postRoutes.PUT("", uHandler.Update)
+		postRoutes.PUT("/profile", uHandler.Update)
 		postRoutes.POST("/search", uHandler.Get)
-		postRoutes.GET("/search/all", uHandler.GetAll)
-		postRoutes.POST("/search/all", uHandler.GetAllWithPagination)
-		postRoutes.DELETE("/:user_id", uHandler.Delete)
 	}
+
+	adminUserHandler := userhandler.NewAdminuserAdminHandler(user.NewUserService(userrepo.NewUserRepository(), rolerepo.NewRoleRepository()))
+	adminUserRoutes := v1Routes.Group("/admin/users")
+	{
+		adminUserRoutes.GET("/search/all", adminUserHandler.GetAllUsers)
+		adminUserRoutes.POST("/search/all", adminUserHandler.GetAllUsersWithPagination)
+		adminUserRoutes.DELETE("/:user_id", adminUserHandler.DeleteUser)
+	}
+}
+
+func registerRoutesForUserAuth() {
+	authHandler := userhandler.NewUserAuthHandler(user.NewUserAuthService(userrepo.NewUserRepository(), rolerepo.NewRoleRepository()))
+	v1Routes.POST("/register", authHandler.Register)
+	v1Routes.POST("/login", authHandler.Login)
 }

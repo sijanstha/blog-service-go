@@ -221,6 +221,10 @@ func (repo *userRepository) Find(filter user.UserFilter) (*user.UserDomain, erro
 		condition += "AND email = ? "
 		args = append(args, filter.Email)
 	}
+	if filter.Password != "" && len(filter.Password) > 0 {
+		condition += "AND password_hash = ? "
+		args = append(args, filter.Password)
+	}
 	if filter.Active != nil {
 		condition += "AND active = ? "
 		args = append(args, filter.Active)

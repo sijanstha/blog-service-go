@@ -5,6 +5,7 @@ go 1.17
 require go.uber.org/zap v1.19.1
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.7.4 // indirect
 	github.com/go-mysql/errors v0.0.0-20180603193453-03314bea68e0

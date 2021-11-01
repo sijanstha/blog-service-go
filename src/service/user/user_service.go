@@ -4,13 +4,10 @@ import (
 	"github.com/blog-service/src/domain/user"
 	rolerepo "github.com/blog-service/src/repository/role"
 	userrepo "github.com/blog-service/src/repository/user"
-	"github.com/blog-service/src/utils/crypto"
 	"github.com/blog-service/src/utils/errors"
-	stringutils "github.com/blog-service/src/utils/string"
 )
 
 type IUserService interface {
-	Save(*user.UserDomain) (*user.UserDomain, *errors.RestErr)
 	Update(*user.UserDomain) (*user.UserDomain, *errors.RestErr)
 	FindById(string) (*user.UserDomain, *errors.RestErr)
 	Find(user.UserFilter) (*user.UserDomain, *errors.RestErr)
@@ -29,38 +26,6 @@ func NewUserService(userRepo userrepo.IUserRepository, roleRepo rolerepo.IRoleRe
 		userRepo,
 		roleRepo,
 	}
-}
-
-func (s *userService) Save(request *user.UserDomain) (*user.UserDomain, *errors.RestErr) {
-	err := request.Validate(user.SAVE_REQUEST_TYPE)
-	if err != nil {
-		return nil, errors.NewBadRequestError(err.Error())
-	}
-
-	_, err = s.roleRepo.FindById(request.RoleId)
-	if err != nil {
-		return nil, errors.NewNotFoundError(err.Error())
-	}
-
-	userFilter := user.UserFilter{
-		Email:   request.Email,
-		Active:  func(b bool) *bool { return &b }(true),
-		Deleted: func(b bool) *bool { return &b }(false),
-	}
-	fetchedUser, _ := s.Find(userFilter)
-	if fetchedUser != nil {
-		return nil, errors.NewBadRequestError("email already exists")
-	}
-
-	request.Id = stringutils.GenerateUniqueId()
-	request.Password = crypto.GetMd5(request.Password)
-	entity := request.ToUserEntity(user.SAVE_REQUEST_TYPE)
-
-	result, err := s.userRepo.Save(&entity)
-	if err != nil {
-		return nil, errors.NewInternalServerError(err.Error())
-	}
-	return result, nil
 }
 
 func (s *userService) Update(request *user.UserDomain) (*user.UserDomain, *errors.RestErr) {

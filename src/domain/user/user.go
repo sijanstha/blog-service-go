@@ -91,7 +91,7 @@ func (u *UserDomain) Validate(requestType int) error {
 		}
 
 		// TODO: Make a password policy to verify password
-		if len(u.Password) < 10 {
+		if len(u.Password) < 5 {
 			return ErrInvalidPassword
 		}
 	}

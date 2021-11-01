@@ -8,10 +8,11 @@ import (
 )
 
 type UserFilter struct {
-	Id      string `json:"id"`
-	Email   string `json:"email"`
-	Active  *bool  `json:"active"`
-	Deleted *bool  `json:"deleted"`
+	Id       string `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"-"`
+	Active   *bool  `json:"active"`
+	Deleted  *bool  `json:"deleted"`
 }
 
 type UserListFilter struct {
