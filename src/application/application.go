@@ -9,6 +9,7 @@ import (
 	postrepo "github.com/blog-service/src/repository/post"
 	rolerepo "github.com/blog-service/src/repository/role"
 	userrepo "github.com/blog-service/src/repository/user"
+	"github.com/blog-service/src/security/middleware"
 	"github.com/blog-service/src/service/comment"
 	"github.com/blog-service/src/service/post"
 	"github.com/blog-service/src/service/role"
@@ -28,6 +29,7 @@ func StartApplication() {
 	registerRoutesForPost()
 	registerRoutesForComment()
 	registerRoutesForUser()
+	router.Use(middleware.CORSMiddleware())
 	router.Run(":8080")
 }
 
