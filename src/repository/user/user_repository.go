@@ -35,6 +35,7 @@ type IUserRepository interface {
 	FindAll() user.UserDomainList
 	FindAllWithPagination(user.UserListFilter) *user.UserPaginationDetails
 	Delete(*user.User) error
+	CountUser(user.UserFilter) (int, error)
 }
 
 type userRepository struct{}
@@ -211,28 +212,7 @@ func (repo *userRepository) Find(filter user.UserFilter) (*user.UserDomain, erro
 		return nil, err
 	}
 
-	args := make([]interface{}, 0)
-	var condition string = "1 = 1 "
-	if filter.Id != "" && len(filter.Id) > 0 {
-		condition += "AND id = ? "
-		args = append(args, filter.Id)
-	}
-	if filter.Email != "" && len(filter.Email) > 0 {
-		condition += "AND email = ? "
-		args = append(args, filter.Email)
-	}
-	if filter.Password != "" && len(filter.Password) > 0 {
-		condition += "AND password_hash = ? "
-		args = append(args, filter.Password)
-	}
-	if filter.Active != nil {
-		condition += "AND active = ? "
-		args = append(args, filter.Active)
-	}
-	if filter.Deleted != nil {
-		condition += "AND deleted = ? "
-		args = append(args, filter.Deleted)
-	}
+	condition, args := prepareQueryCondition(filter)
 
 	tblName, columns, _ := sqlutils.GetTableMetadata(tableMetadata)
 	query := fmt.Sprintf(str, columns, tblName, condition)
@@ -335,16 +315,7 @@ func (repo *userRepository) FindAllWithPagination(filter user.UserListFilter) *u
 		return result
 	}
 
-	condition := "1=1 "
-	args := make([]interface{}, 0)
-	if filter.Filter.Active != nil {
-		condition += "AND active = ? "
-		args = append(args, filter.Filter.Active)
-	}
-	if filter.Filter.Deleted != nil {
-		condition += "AND deleted = ? "
-		args = append(args, filter.Filter.Deleted)
-	}
+	condition, args := prepareQueryCondition(filter.Filter)
 	if filter.CreatedAt != "" {
 		condition += "AND created_at = ? "
 		args = append(args, filter.CreatedAt)
@@ -373,7 +344,7 @@ func (repo *userRepository) FindAllWithPagination(filter user.UserListFilter) *u
 	var count int
 	countResult := countRowsStmt.QueryRow(args...)
 	if err := countResult.Scan(&count); err != nil {
-		logger.Error("No any post record in database", err)
+		logger.Error("No any user record in database", err)
 		return result
 	}
 
@@ -420,4 +391,68 @@ func (repo *userRepository) Delete(request *user.User) error {
 		return err
 	}
 	return nil
+}
+
+func (repo *userRepository) CountUser(filter user.UserFilter) (int, error) {
+	countRowsQueryStr, err := fileutils.LoadResourceAsString(COUNT_USER_ROWS_LOC)
+	if err != nil {
+		logger.Error(fmt.Sprintf("cannot open file to this path: %s", COUNT_USER_ROWS_LOC), err)
+		return 0, err
+	}
+
+	tableMetadata, err := fileutils.GetTableInformation(USER_TABLE_DEFINITION)
+	if err != nil {
+		logger.Error(fmt.Sprintf("cannot open file to this path: %s", USER_TABLE_DEFINITION), err)
+		return 0, err
+	}
+
+	condition, args := prepareQueryCondition(filter)
+	countRowsQuery := fmt.Sprintf(countRowsQueryStr, "id", sqlutils.GetTableName(tableMetadata), condition)
+
+	countRowsStmt, err := mysql.Client.Prepare(countRowsQuery)
+	if err != nil {
+		logger.Error("invalid query", err)
+		return 0, err
+	}
+	defer countRowsStmt.Close()
+
+	var count int
+	countResult := countRowsStmt.QueryRow(args...)
+	if err := countResult.Scan(&count); err != nil {
+		logger.Error("No any post record in database", err)
+		return 0, ErrUserNotFound
+	}
+
+	return count, nil
+}
+
+func prepareQueryCondition(filter user.UserFilter) (string, []interface{}) {
+	args := make([]interface{}, 0)
+	var condition string = "1 = 1 "
+	if filter.Id != "" && len(filter.Id) > 0 {
+		condition += "AND id = ? "
+		args = append(args, filter.Id)
+	}
+	if filter.Email != "" && len(filter.Email) > 0 {
+		condition += "AND email = ? "
+		args = append(args, filter.Email)
+	}
+	if filter.Password != "" && len(filter.Password) > 0 {
+		condition += "AND password_hash = ? "
+		args = append(args, filter.Password)
+	}
+	if filter.RoleId != "" && len(filter.RoleId) > 0 {
+		condition += "AND fk_role_id = ? "
+		args = append(args, filter.RoleId)
+	}
+	if filter.Active != nil {
+		condition += "AND active = ? "
+		args = append(args, filter.Active)
+	}
+	if filter.Deleted != nil {
+		condition += "AND deleted = ? "
+		args = append(args, filter.Deleted)
+	}
+
+	return condition, args
 }

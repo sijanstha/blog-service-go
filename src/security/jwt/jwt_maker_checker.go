@@ -1,44 +1,44 @@
 package jwt
 
-// import (
-// 	"fmt"
-// 	"time"
-// 	jwt "github.com/dgrijalva/jwt-go"
-//   )
+import (
+	"os"
+	"time"
 
-//   type JwtTokenGenerator interface {
-// 	  GetToken(Payload) string
-//   }
+	"github.com/blog-service/src/utils/logger"
+	stringutils "github.com/blog-service/src/utils/string"
+	jwt "github.com/dgrijalva/jwt-go"
+)
 
-//   type JwtTokenValidator interface{
-// 	  ValidateToken(string) Payload
-//   }
-  
-//   func GetJWT() (string, error) {
-// 	token := jwt.New(jwt.SigningMethodHS256)
-  
-// 	claims := token.Claims.(jwt.MapClaims)
-  
-// 	claims["authorized"] = true
-// 	claims["client"] = "Krissanawat"
-// 	claims["aud"] = "billing.jwtgo.io"
-// 	claims["iss"] = "jwtgo.io"
-// 	claims["exp"] = time.Now().Add(time.Minute * 1).Unix()
-  
-// 	tokenString, err := token.SignedString(mySigningKey)
-  
-// 	if err != nil {
-// 	  fmt.Errorf("Something Went Wrong: %s", err.Error())
-// 	  return "", err
-// 	}
-  
-// 	return tokenString, nil
-//   }
- 
+var (
+	token_signing_key = os.Getenv("token_signing_key")
+	token_expiry_time = stringutils.ParseInteger(os.Getenv("token_expiry_time"))
+)
 
-//   type Payload struct {
-// 	  id string
-// 	  username string
-// 	  role string
-//   }
-  
+type JwtTokenService struct{}
+
+func (service *JwtTokenService) GetToken(request Payload) (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+
+	claims["authorized"] = true
+	claims["email"] = request.Email
+	claims["id"] = request.Id
+	claims["role"] = request.Role
+	claims["aud"] = "blog.service.io"
+	claims["iss"] = "blog.service.io"
+	claims["exp"] = time.Now().Add(time.Duration(token_expiry_time) * time.Minute).Unix()
+
+	tokenString, err := token.SignedString([]byte(token_signing_key))
+
+	if err != nil {
+		logger.Error("error while creating token", err)
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+func (service *JwtTokenService) ValidateToken(token string) (*Payload, error) {
+	return nil, nil
+}

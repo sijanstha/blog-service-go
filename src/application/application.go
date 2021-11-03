@@ -62,7 +62,7 @@ func registerRoutesForComment() {
 }
 
 func registerRoutesForRole() {
-	rHandler := rolehandler.NewRoleHandler(role.NewRoleService(rolerepo.NewRoleRepository()))
+	rHandler := rolehandler.NewRoleHandler(role.NewRoleService(rolerepo.NewRoleRepository(), userrepo.NewUserRepository()))
 
 	roleRoutes := v1Routes.Group("/roles")
 	{

@@ -11,6 +11,7 @@ type UserFilter struct {
 	Id       string `json:"id"`
 	Email    string `json:"email"`
 	Password string `json:"-"`
+	RoleId   string `json:"-"`
 	Active   *bool  `json:"active"`
 	Deleted  *bool  `json:"deleted"`
 }

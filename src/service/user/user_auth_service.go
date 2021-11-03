@@ -4,6 +4,8 @@ import (
 	"github.com/blog-service/src/domain/user"
 	rolerepo "github.com/blog-service/src/repository/role"
 	userrepo "github.com/blog-service/src/repository/user"
+	"github.com/blog-service/src/security/jwt"
+	"github.com/blog-service/src/utils"
 	"github.com/blog-service/src/utils/crypto"
 	"github.com/blog-service/src/utils/errors"
 	stringutils "github.com/blog-service/src/utils/string"
@@ -60,9 +62,24 @@ func (service *userAuthService) Login(request *user.UserLoginRequest) (*user.Use
 		return nil, errors.NewUnauthorizedError("invalid email or password")
 	}
 
+	fetchedRole, err := service.roleRepo.FindById(fetchedUser.RoleId)
+	if err != nil {
+		return nil, errors.NewUnauthorizedError("invalid email or password")
+	}
+
+	jwtService := &jwt.JwtTokenService{}
+	token, err := jwtService.GetToken(jwt.Payload{
+		Id:    fetchedUser.Id,
+		Email: fetchedUser.Email,
+		Role:  fetchedRole.RoleName,
+	})
+	if err != nil {
+		return nil, errors.NewUnauthorizedError("couldn't generate token")
+	}
+
 	response := user.UserLoginResponse{
 		UserDetails: *fetchedUser,
-		Token:       "ABCDEFGHIJKLMNOPQRST",
+		Token:       token,
 	}
 
 	return &response, nil
@@ -71,8 +88,8 @@ func (service *userAuthService) Login(request *user.UserLoginRequest) (*user.Use
 func (service *userAuthService) findUserByEmail(email string) (*user.UserDomain, error) {
 	userFilter := user.UserFilter{
 		Email:   email,
-		Active:  func(b bool) *bool { return &b }(true),
-		Deleted: func(b bool) *bool { return &b }(false),
+		Active:  utils.BoolAddr(true),
+		Deleted: utils.BoolAddr(false),
 	}
 	return service.userRepo.Find(userFilter)
 }
@@ -81,8 +98,8 @@ func (service *userAuthService) findUserForAuthentication(email string, password
 	userFilter := user.UserFilter{
 		Email:    email,
 		Password: passwordHash,
-		Active:   func(b bool) *bool { return &b }(true),
-		Deleted:  func(b bool) *bool { return &b }(false),
+		Active:   utils.BoolAddr(true),
+		Deleted:  utils.BoolAddr(false),
 	}
 	return service.userRepo.Find(userFilter)
 }
