@@ -2,9 +2,13 @@ package role
 
 import (
 	"github.com/blog-service/src/domain/role"
+	"github.com/blog-service/src/domain/user"
 	rolerepo "github.com/blog-service/src/repository/role"
+	userrepo "github.com/blog-service/src/repository/user"
+	"github.com/blog-service/src/utils"
 	dateutils "github.com/blog-service/src/utils/date"
 	"github.com/blog-service/src/utils/errors"
+	"github.com/blog-service/src/utils/logger"
 	stringutils "github.com/blog-service/src/utils/string"
 )
 
@@ -19,11 +23,13 @@ type IRoleService interface {
 
 type roleService struct {
 	roleRepository rolerepo.IRoleRepository
+	userRepository userrepo.IUserRepository
 }
 
-func NewRoleService(roleRepository rolerepo.IRoleRepository) IRoleService {
+func NewRoleService(roleRepository rolerepo.IRoleRepository, userRepository userrepo.IUserRepository) IRoleService {
 	return &roleService{
 		roleRepository,
+		userRepository,
 	}
 }
 
@@ -123,7 +129,22 @@ func (s *roleService) Delete(id string) *errors.RestErr {
 		return restErr
 	}
 
-	err := s.roleRepository.Delete(req)
+	count, err := s.userRepository.CountUser(user.UserFilter{
+		RoleId:  id,
+		Active:  utils.BoolAddr(true),
+		Deleted: utils.BoolAddr(false),
+	})
+	if err != nil {
+		if err != userrepo.ErrUserNotFound {
+			logger.Error(err.Error(), err)
+			return errors.NewInternalServerError("server down")
+		}
+	}
+	if count >= 1 {
+		return errors.NewBadRequestError("cannot delete this role. role already in use")
+	}
+
+	err = s.roleRepository.Delete(req)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}

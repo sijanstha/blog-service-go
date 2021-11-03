@@ -4,12 +4,15 @@ import (
 	commenthandler "github.com/blog-service/src/http/comment"
 	posthandler "github.com/blog-service/src/http/post"
 	rolehandler "github.com/blog-service/src/http/role"
+	userhandler "github.com/blog-service/src/http/user"
 	commentrepo "github.com/blog-service/src/repository/comment"
 	postrepo "github.com/blog-service/src/repository/post"
 	rolerepo "github.com/blog-service/src/repository/role"
+	userrepo "github.com/blog-service/src/repository/user"
 	"github.com/blog-service/src/service/comment"
 	"github.com/blog-service/src/service/post"
 	"github.com/blog-service/src/service/role"
+	"github.com/blog-service/src/service/user"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,26 +23,27 @@ var (
 
 func StartApplication() {
 
+	registerRoutesForUserAuth()
 	registerRoutesForRole()
 	registerRoutesForPost()
 	registerRoutesForComment()
+	registerRoutesForUser()
 	router.Run(":8080")
 }
 
 func registerRoutesForPost() {
-	pHandler := posthandler.NewPostHandler(post.NewPostService(postrepo.NewPostRepository()))
+	uHandler := posthandler.NewPostHandler(post.NewPostService(postrepo.NewPostRepository()))
 
 	postRoutes := v1Routes.Group("/posts")
 	{
-		postRoutes.GET("/:post_id", pHandler.GetById)
-		postRoutes.POST("", pHandler.Create)
-		postRoutes.PUT("", pHandler.Update)
-		postRoutes.POST("/search", pHandler.Get)
-		postRoutes.GET("/search/all", pHandler.GetAll)
-		postRoutes.POST("/search/all", pHandler.GetAllWithPagination)
-		postRoutes.DELETE("/:post_id", pHandler.Delete)
+		postRoutes.GET("/:post_id", uHandler.GetById)
+		postRoutes.POST("", uHandler.Create)
+		postRoutes.PUT("", uHandler.Update)
+		postRoutes.POST("/search", uHandler.Get)
+		postRoutes.GET("/search/all", uHandler.GetAll)
+		postRoutes.POST("/search/all", uHandler.GetAllWithPagination)
+		postRoutes.DELETE("/:post_id", uHandler.Delete)
 	}
-
 }
 
 func registerRoutesForComment() {
@@ -58,7 +62,7 @@ func registerRoutesForComment() {
 }
 
 func registerRoutesForRole() {
-	rHandler := rolehandler.NewRoleHandler(role.NewRoleService(rolerepo.NewRoleRepository()))
+	rHandler := rolehandler.NewRoleHandler(role.NewRoleService(rolerepo.NewRoleRepository(), userrepo.NewUserRepository()))
 
 	roleRoutes := v1Routes.Group("/roles")
 	{
@@ -69,4 +73,29 @@ func registerRoutesForRole() {
 		roleRoutes.GET("/search/all", rHandler.GetAll)
 		roleRoutes.DELETE("/:role_id", rHandler.Delete)
 	}
+}
+
+func registerRoutesForUser() {
+	uHandler := userhandler.NewUserHandler(user.NewUserService(userrepo.NewUserRepository(), rolerepo.NewRoleRepository()))
+
+	postRoutes := v1Routes.Group("/users")
+	{
+		postRoutes.GET("/:user_id", uHandler.GetById)
+		postRoutes.PUT("/profile", uHandler.Update)
+		postRoutes.POST("/search", uHandler.Get)
+	}
+
+	adminUserHandler := userhandler.NewAdminuserAdminHandler(user.NewUserService(userrepo.NewUserRepository(), rolerepo.NewRoleRepository()))
+	adminUserRoutes := v1Routes.Group("/admin/users")
+	{
+		adminUserRoutes.GET("/search/all", adminUserHandler.GetAllUsers)
+		adminUserRoutes.POST("/search/all", adminUserHandler.GetAllUsersWithPagination)
+		adminUserRoutes.DELETE("/:user_id", adminUserHandler.DeleteUser)
+	}
+}
+
+func registerRoutesForUserAuth() {
+	authHandler := userhandler.NewUserAuthHandler(user.NewUserAuthService(userrepo.NewUserRepository(), rolerepo.NewRoleRepository()))
+	v1Routes.POST("/register", authHandler.Register)
+	v1Routes.POST("/login", authHandler.Login)
 }
