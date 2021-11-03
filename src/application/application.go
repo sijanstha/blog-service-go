@@ -18,25 +18,25 @@ import (
 )
 
 var (
-	router   = gin.Default()
-	v1Routes = router.Group("/api/v1")
+	router = gin.Default()
+	// v1Routes = router.Group("/api/v1")
 )
 
 func StartApplication() {
 
+	router.Use(middleware.CORSMiddleware())
 	registerRoutesForUserAuth()
 	registerRoutesForRole()
 	registerRoutesForPost()
 	registerRoutesForComment()
 	registerRoutesForUser()
-	router.Use(middleware.CORSMiddleware())
 	router.Run(":8080")
 }
 
 func registerRoutesForPost() {
 	uHandler := posthandler.NewPostHandler(post.NewPostService(postrepo.NewPostRepository()))
 
-	postRoutes := v1Routes.Group("/posts")
+	postRoutes := router.Group("/api/v1/posts")
 	{
 		postRoutes.GET("/:post_id", uHandler.GetById)
 		postRoutes.POST("", uHandler.Create)
@@ -51,7 +51,7 @@ func registerRoutesForPost() {
 func registerRoutesForComment() {
 	cHandler := commenthandler.NewCommentHandler(comment.NewCommentService(postrepo.NewPostRepository(), commentrepo.NewCommentRepository()))
 
-	commentRoutes := v1Routes.Group("/posts/:post_id/comments")
+	commentRoutes := router.Group("/api/v1/posts/:post_id/comments")
 	{
 		commentRoutes.GET("/:comment_id", cHandler.GetById)
 		commentRoutes.POST("", cHandler.Create)
@@ -66,7 +66,7 @@ func registerRoutesForComment() {
 func registerRoutesForRole() {
 	rHandler := rolehandler.NewRoleHandler(role.NewRoleService(rolerepo.NewRoleRepository(), userrepo.NewUserRepository()))
 
-	roleRoutes := v1Routes.Group("/roles")
+	roleRoutes := router.Group("/api/v1/roles")
 	{
 		roleRoutes.GET("/:role_id", rHandler.GetById)
 		roleRoutes.POST("", rHandler.Create)
@@ -80,7 +80,7 @@ func registerRoutesForRole() {
 func registerRoutesForUser() {
 	uHandler := userhandler.NewUserHandler(user.NewUserService(userrepo.NewUserRepository(), rolerepo.NewRoleRepository()))
 
-	postRoutes := v1Routes.Group("/users")
+	postRoutes := router.Group("/api/v1/users")
 	{
 		postRoutes.GET("/:user_id", uHandler.GetById)
 		postRoutes.PUT("/profile", uHandler.Update)
@@ -88,7 +88,7 @@ func registerRoutesForUser() {
 	}
 
 	adminUserHandler := userhandler.NewAdminuserAdminHandler(user.NewUserService(userrepo.NewUserRepository(), rolerepo.NewRoleRepository()))
-	adminUserRoutes := v1Routes.Group("/admin/users")
+	adminUserRoutes := router.Group("/admin/users")
 	{
 		adminUserRoutes.GET("/search/all", adminUserHandler.GetAllUsers)
 		adminUserRoutes.POST("/search/all", adminUserHandler.GetAllUsersWithPagination)
@@ -98,6 +98,6 @@ func registerRoutesForUser() {
 
 func registerRoutesForUserAuth() {
 	authHandler := userhandler.NewUserAuthHandler(user.NewUserAuthService(userrepo.NewUserRepository(), rolerepo.NewRoleRepository()))
-	v1Routes.POST("/register", authHandler.Register)
-	v1Routes.POST("/login", authHandler.Login)
+	router.POST("/register", authHandler.Register)
+	router.POST("/login", authHandler.Login)
 }
