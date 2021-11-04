@@ -9,7 +9,7 @@ import (
 
 type CommentFilter struct {
 	Id      string `json:"id"`
-	PostId  string `json:"postId"`
+	PostId  string `json:"-"`
 	Active  *bool  `json:"active"`
 	Deleted *bool  `json:"deleted"`
 }
