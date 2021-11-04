@@ -34,6 +34,7 @@ func (handler *commentHandler) Create(c *gin.Context) {
 		return
 	}
 
+	request.PostId = c.Param("post_id")
 	result, err := handler.commentService.Save(&request)
 	if err != nil {
 		c.JSON(err.Code, err)
@@ -50,6 +51,7 @@ func (handler *commentHandler) Update(c *gin.Context) {
 		return
 	}
 
+	request.PostId = c.Param("post_id")
 	result, err := handler.commentService.Update(&request)
 	if err != nil {
 		c.JSON(err.Code, err)
@@ -75,6 +77,7 @@ func (handler *commentHandler) Get(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, "Invalid JSON body")
 		return
 	}
+	request.PostId = c.Param("post_id")
 	result, err := handler.commentService.Find(request)
 	if err != nil {
 		c.JSON(err.Code, err)
@@ -94,6 +97,7 @@ func (handler *commentHandler) GetAllWithPagination(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, "Invalid JSON body")
 		return
 	}
+	request.Filter.PostId = c.Param("post_id")
 	result, err := handler.commentService.FindAllWithPagination(request)
 	if err != nil {
 		c.JSON(err.Code, err)
