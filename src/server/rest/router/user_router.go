@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (rm *RouterManager) RegisterRoutesForUser(group *gin.RouterGroup) {
-	uHandler := handler.NewUserHandler(rm.userService)
+func (rm *RestBeanManager) RegisterRoutesForUser(group *gin.RouterGroup) {
+	uHandler := handler.NewUserHandler(rm.GetUserService())
 
 	group.GET("/:user_id", uHandler.GetById)
 	group.PUT("/profile", uHandler.Update)

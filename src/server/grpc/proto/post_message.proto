@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package pb;
+
+import "enum_message.proto";
+
+option go_package = "./pb";
+
+
+message CreatePostRequest {
+    string id = 1;
+    string title = 2;
+	string description = 3;
+}
+
+message UpdatePostRequest {
+    string id = 1;
+    string title = 2;
+	string description = 3;
+	bool isActive = 4;
+	bool isDeleted = 5;
+}
+
+message PostResponse {
+    string id = 1;
+    string title = 2;
+	string description = 3;
+	bool isActive = 4;
+	bool isDeleted = 5;
+    string createdAt = 6;
+    string updatedAt = 7;
+    string deletedAt = 8;
+}
+
+message PostFilter {
+    string id = 1;
+    string title = 2;
+	bool isActive = 4;
+	bool isDeleted = 5;
+}
+
+message PostListFilter {
+    string id = 1;
+    string title = 2;
+	bool isActive = 4;
+	bool isDeleted = 5;
+    string createdAt = 6;
+    uint32 limit = 7;
+    uint32 page = 8;
+    Sort sort = 9;
+    SortBy sortBy = 10;
+}

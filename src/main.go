@@ -5,9 +5,13 @@ import (
 
 	db "github.com/blog-service/src/datasources/mysql"
 	"github.com/blog-service/src/repository"
+	"github.com/blog-service/src/server"
+	"github.com/blog-service/src/server/grpc"
+	"github.com/blog-service/src/server/grpc/handler"
 	"github.com/blog-service/src/server/rest"
 	"github.com/blog-service/src/server/rest/router"
 	"github.com/blog-service/src/service"
+	stringutils "github.com/blog-service/src/utils/string"
 )
 
 func main() {
@@ -24,8 +28,12 @@ func main() {
 	var postService service.IPostService
 	var commentService service.ICommentService
 
+	var server server.ServerPort
+
 	dbaseDriver := os.Getenv("DB_DRIVER")
 	dbaseConnectionString := os.Getenv("DB_URL")
+	grpcFlag := os.Getenv("GRPC_FLAG")
+	isGrpcServerFlagEnabled := (!stringutils.IsEmptyOrNull(grpcFlag) && (grpcFlag == "True" || grpcFlag == "true"))
 
 	dbPort = db.NewDbAdapter(dbaseDriver, dbaseConnectionString)
 	roleRepo = repository.NewRoleRepository(dbPort)
@@ -39,7 +47,12 @@ func main() {
 	commentService = service.NewCommentService(postRepo, commentRepo)
 	userAuthService = service.NewUserAuthService(userRepo, roleRepo)
 
-	rm := router.NewRouterManager(roleService, userService, userAuthService, postService, commentService)
-	httpServer := rest.NewHttpServerAdapter(rm)
-	httpServer.StartApplication(":9090")
+	rm := service.CreateFactory(roleService, userService, userAuthService, postService, commentService)
+	if isGrpcServerFlagEnabled {
+		server = grpc.NewGrpcServerAdapter(handler.NewGrpcBeanManager(rm))
+	} else {
+		server = rest.NewHttpServerAdapter(router.NewRestBeanManager(rm))
+	}
+
+	server.StartApplication(":9090")
 }
