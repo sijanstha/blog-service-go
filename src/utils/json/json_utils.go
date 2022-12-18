@@ -4,7 +4,14 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	dateutils "github.com/blog-service/src/utils/date"
 )
+
+type apiResponse struct {
+	Data      interface{} `json:"data"`
+	Timestamp string      `json:"timestamp"`
+}
 
 func ShouldBindJSON(request *http.Request, object interface{}) error {
 	requestBody, err := ioutil.ReadAll(request.Body)
@@ -18,4 +25,11 @@ func ShouldBindJSON(request *http.Request, object interface{}) error {
 	}
 
 	return nil
+}
+
+func OkWithJSONObject(object interface{}) *apiResponse {
+	return &apiResponse{
+		Data:      object,
+		Timestamp: dateutils.GetTodayDateInString(),
+	}
 }

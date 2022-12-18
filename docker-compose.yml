@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment: 
+      MYSQL_ROOT_PASSWORD: "admin"
+      MYSQL_DATABASE: "db_blog"
+    volumes: 
+      - ./init-db:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306" 
+    networks:
+      - blog-service-network
+
+  blog-service:
+    build: .
+    environment:
+      DB_DRIVER: "mysql"
+      DB_URL: "root:admin@tcp(db:3306)/db_blog"
+      MYSQL_HOST: "db"
+      MYSQL_PASSWORD: "admin"
+      MYSQL_DB: "db_blog"
+      MYSQL_USER: "root"
+      MYSQL_PORT: "3306"
+    depends_on:
+      - db
+    ports:
+      - "9090:9090"
+    networks:
+      - blog-service-network
+
+networks:
+  blog-service-network:
+    driver: bridge
