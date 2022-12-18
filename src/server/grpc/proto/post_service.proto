@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+import "post_message.proto";
+
+option go_package = "./pb";
+
+service PostService {
+    rpc CreatePost(CreatePostRequest) returns (PostResponse) {};
+    rpc UpdatePost(UpdatePostRequest) returns (PostResponse) {};
+    rpc FindPost(PostFilter) returns (PostResponse) {};
+}

@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (rm *RouterManager) RegisterRoutesForUserAuth(group *gin.RouterGroup) {
-	authHandler := handler.NewUserAuthHandler(rm.userAuthService)
+func (rm *RestBeanManager) RegisterRoutesForUserAuth(group *gin.RouterGroup) {
+	authHandler := handler.NewUserAuthHandler(rm.GetUserAuthService())
 	group.POST("/register", authHandler.Register)
 	group.POST("/login", authHandler.Login)
 }

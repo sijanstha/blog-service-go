@@ -25,6 +25,7 @@ services:
       MYSQL_DB: "db_blog"
       MYSQL_USER: "root"
       MYSQL_PORT: "3306"
+      GRPC_FLAG: "True"
     depends_on:
       - db
     ports:

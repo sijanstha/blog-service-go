@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (rm *RouterManager) RegisterRoutesForPost(group *gin.RouterGroup) {
-	uHandler := handler.NewPostHandler(rm.postService)
+func (rm *RestBeanManager) RegisterRoutesForPost(group *gin.RouterGroup) {
+	uHandler := handler.NewPostHandler(rm.GetPostService())
 	group.GET("/:post_id", uHandler.GetById)
 	group.POST("", uHandler.Create)
 	group.PUT("", uHandler.Update)

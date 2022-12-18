@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (rm *RouterManager) RegisterRoutesForComment(group *gin.RouterGroup) {
-	cHandler := handler.NewCommentHandler(rm.commentService)
+func (rm *RestBeanManager) RegisterRoutesForComment(group *gin.RouterGroup) {
+	cHandler := handler.NewCommentHandler(rm.GetCommentService())
 	group.GET("/:comment_id", cHandler.GetById)
 	group.POST("", cHandler.Create)
 	group.PUT("", cHandler.Update)

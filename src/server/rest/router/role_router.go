@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (rm *RouterManager) RegisterRoutesForRole(group *gin.RouterGroup) {
-	rHandler := handler.NewRoleHandler(rm.roleService)
+func (rm *RestBeanManager) RegisterRoutesForRole(group *gin.RouterGroup) {
+	rHandler := handler.NewRoleHandler(rm.GetRoleService())
 
 	group.GET("/:role_id", rHandler.GetById)
 	group.POST("", rHandler.Create)

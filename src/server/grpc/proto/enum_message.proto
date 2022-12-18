@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb";
+
+enum Sort {
+    ASC = 0;
+    DESC = 1;
+}
+
+enum SortBy {
+    title = 0;
+    created_at = 1;
+    updated_at = 2;
+    description = 3;
+    id = 4;
+}
