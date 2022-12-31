@@ -1,6 +1,11 @@
 package service
 
 import (
+	"context"
+	"encoding/json"
+
+	"github.com/blog-service/src/config"
+	"github.com/blog-service/src/domain"
 	"github.com/blog-service/src/domain/post"
 	"github.com/blog-service/src/repository"
 	dateutils "github.com/blog-service/src/utils/date"
@@ -19,12 +24,22 @@ type IPostService interface {
 }
 
 type postService struct {
-	postRepo repository.IPostRepository
+	postRepo        repository.IPostRepository
+	producer        *config.KafkaProducer
+	postChangeTopic string
 }
 
-func NewPostService(postRepo repository.IPostRepository) IPostService {
+func NewPostService(postRepo repository.IPostRepository, kafkaProducer *config.KafkaProducer, postChangeTopic string) IPostService {
 	return &postService{
-		postRepo,
+		postRepo:        postRepo,
+		producer:        kafkaProducer,
+		postChangeTopic: postChangeTopic,
+	}
+}
+
+func NewTestPostService(postRepo repository.IPostRepository) IPostService {
+	return &postService{
+		postRepo: postRepo,
 	}
 }
 
@@ -45,6 +60,17 @@ func (s *postService) Save(request *post.Post) (*post.Post, *errors.RestErr) {
 	if err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
+
+	go func() {
+		if s.producer != nil {
+			msg := domain.Message{
+				ChangeType: domain.CREATE,
+				Body:       result,
+			}
+			stringJson, _ := json.Marshal(msg)
+			s.producer.Produce(context.Background(), s.postChangeTopic, stringJson)
+		}
+	}()
 	return result, nil
 }
 
@@ -71,6 +97,18 @@ func (s *postService) Update(request *post.Post) (*post.Post, *errors.RestErr) {
 	if err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
+
+	go func() {
+		if s.producer != nil {
+			msg := domain.Message{
+				ChangeType: domain.UPDATE,
+				Body:       result,
+			}
+			stringJson, _ := json.Marshal(msg)
+			s.producer.Produce(context.Background(), s.postChangeTopic, stringJson)
+		}
+	}()
+
 	return result, nil
 }
 

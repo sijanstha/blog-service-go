@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/blog-service/src/config"
 	db "github.com/blog-service/src/datasources/mysql"
 	"github.com/blog-service/src/repository"
 	"github.com/blog-service/src/server"
@@ -29,10 +30,13 @@ func main() {
 	var commentService service.ICommentService
 
 	var server server.ServerPort
+	var kafkaProducer *config.KafkaProducer
 
 	dbaseDriver := os.Getenv("DB_DRIVER")
 	dbaseConnectionString := os.Getenv("DB_URL")
 	grpcFlag := os.Getenv("GRPC_FLAG")
+	kafkaBootstrapServer := os.Getenv("KAFKA_BOOTSTRAP_SERVER")
+	postChangeTopic := os.Getenv("POST_CHANGE_TOPIC")
 	isGrpcServerFlagEnabled := (!stringutils.IsEmptyOrNull(grpcFlag) && (grpcFlag == "True" || grpcFlag == "true"))
 
 	dbPort = db.NewDbAdapter(dbaseDriver, dbaseConnectionString)
@@ -40,10 +44,13 @@ func main() {
 	userRepo = repository.NewUserRepository(dbPort)
 	postRepo = repository.NewPostRepository(dbPort)
 	commentRepo = repository.NewCommentRepository(dbPort)
+	kafkaProducer = config.NewKafkaProducer(kafkaBootstrapServer)
+
+	defer kafkaProducer.CloseConnection()
 
 	roleService = service.NewRoleService(roleRepo, userRepo)
 	userService = service.NewUserService(userRepo, roleRepo)
-	postService = service.NewPostService(postRepo)
+	postService = service.NewPostService(postRepo, kafkaProducer, postChangeTopic)
 	commentService = service.NewCommentService(postRepo, commentRepo)
 	userAuthService = service.NewUserAuthService(userRepo, roleRepo)
 

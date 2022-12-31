@@ -3,21 +3,24 @@ module github.com/blog-service
 go 1.17
 
 require (
-	github.com/stretchr/testify v1.7.0
+	github.com/segmentio/kafka-go v0.4.38
+	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.19.1
 	google.golang.org/grpc v1.51.0
 )
 
 require (
+	github.com/klauspost/compress v1.15.9 // indirect
+	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
-	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
+	google.golang.org/genproto v0.0.0-20220503193339-ba3ae3f07e29 // indirect
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/mock v1.6.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
@@ -38,9 +41,9 @@ require (
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/text v0.4.0 // indirect
-	google.golang.org/protobuf v1.27.1
+	google.golang.org/protobuf v1.28.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

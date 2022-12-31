@@ -2,6 +2,8 @@ package post
 
 import (
 	"errors"
+
+	"github.com/blog-service/src/server/grpc/pb"
 )
 
 var (
@@ -54,4 +56,17 @@ func (p *Post) Validate() error {
 	}
 
 	return nil
+}
+
+func (res *Post) ToPostResponse() *pb.PostResponse {
+	return &pb.PostResponse{
+		Id:          res.Id,
+		Title:       res.Title,
+		Description: res.Description,
+		IsActive:    res.IsActive,
+		IsDeleted:   res.IsDeleted,
+		CreatedAt:   res.CreatedAt,
+		UpdatedAt:   res.UpdatedAt,
+		DeletedAt:   res.DeletedAt,
+	}
 }

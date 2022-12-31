@@ -12,8 +12,6 @@ services:
       - ./init-db:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306" 
-    networks:
-      - blog-service-network
 
   blog-service:
     build: .
@@ -25,14 +23,15 @@ services:
       MYSQL_DB: "db_blog"
       MYSQL_USER: "root"
       MYSQL_PORT: "3306"
-      GRPC_FLAG: "True"
+      GRPC_FLAG: "False"
+      KAFKA_BOOTSTRAP_SERVER: "broker:9092"
+      POST_CHANGE_TOPIC: "post-change-topic"
     depends_on:
       - db
     ports:
       - "9090:9090"
-    networks:
-      - blog-service-network
 
-networks:
-  blog-service-network:
-    driver: bridge
+networks: 
+  default: 
+    external: 
+      name: blog-service-network

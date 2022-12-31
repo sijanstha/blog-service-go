@@ -21,7 +21,7 @@ func TestSave(t *testing.T) {
 	mockPostRepository := mock_repository.NewMockIPostRepository(ctrl)
 	mockPostRepository.EXPECT().Save(gomock.Any()).Return(post, nil)
 
-	service := service.NewPostService(mockPostRepository)
+	service := service.NewTestPostService(mockPostRepository)
 	returnedObject, err := service.Save(post)
 	require.Nil(t, err)
 	require.NotNil(t, returnedObject)
@@ -30,7 +30,7 @@ func TestSave(t *testing.T) {
 func TestSaveIfTitleIsInvalid(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockPostRepository := mock_repository.NewMockIPostRepository(ctrl)
-	service := service.NewPostService(mockPostRepository)
+	service := service.NewTestPostService(mockPostRepository)
 	returnedObject, err := service.Save(&post.Post{Title: "", Description: "testksadhkashdkahkjhdkahskdhaskjdhakshdaskdhksatestksadhkashdkahkjhdkahskdhaskjdhakshdaskdhksatestksadhkashdkahkjhdkahskdhaskjdhakshdaskdhksa"})
 
 	require.NotNil(t, err)
@@ -47,7 +47,7 @@ func TestFindById(t *testing.T) {
 	mockPostRepository := mock_repository.NewMockIPostRepository(ctrl)
 	mockPostRepository.EXPECT().FindById(id).Return(post, nil)
 
-	service := service.NewPostService(mockPostRepository)
+	service := service.NewTestPostService(mockPostRepository)
 	returnedObject, err := service.FindById(id)
 	require.Nil(t, err)
 	require.NotNil(t, returnedObject)

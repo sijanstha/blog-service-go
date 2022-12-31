@@ -7,3 +7,9 @@ stop:
 compile-proto:
 	protoc --go_out=src/server/grpc --proto_path=src/server/grpc/proto src/server/grpc/proto/*_message.proto
 	protoc --go-grpc_out=src/server/grpc --proto_path=src/server/grpc/proto src/server/grpc/proto/*_service.proto
+
+container-ls:
+	docker container ls
+
+container-logs:
+	docker container logs $(id)
